@@ -1,5 +1,5 @@
 load("@bazel_skylib//rules:common_settings.bzl", "BuildSettingInfo")
-load("@bazel_tools//tools/jdk:toolchain_utils.bzl", "find_java_runtime_toolchain", "find_java_toolchain")
+load("@bazel_tools//tools/jdk:toolchain_utils.bzl", "find_java_toolchain")
 load("@rules_proto//proto:defs.bzl", "ProtoInfo")
 
 # Borrowed from https://github.com/grpc/grpc-java/blob/v1.28.0/java_grpc_library.bzl#L59
@@ -110,13 +110,13 @@ cc_proto_gen_validate = rule(
             default = [Label("@com_googlesource_code_re2//:re2")],
         ),
         "_protoc": attr.label(
-            cfg = "host",
+            cfg = "exec",
             default = Label("@com_google_protobuf//:protoc"),
             executable = True,
             allow_single_file = True,
         ),
         "_plugin": attr.label(
-            cfg = "host",
+            cfg = "exec",
             default = Label("@com_envoyproxy_protoc_gen_validate//:protoc-gen-validate"),
             allow_files = True,
             executable = True,
@@ -171,13 +171,13 @@ _java_proto_gen_validate_aspect = aspect(
     attr_aspects = ["deps"],
     attrs = {
         "_protoc": attr.label(
-            cfg = "host",
+            cfg = "exec",
             default = Label("@com_google_protobuf//:protoc"),
             executable = True,
             allow_single_file = True,
         ),
         "_plugin": attr.label(
-            cfg = "host",
+            cfg = "exec",
             default = Label("@com_envoyproxy_protoc_gen_validate//:protoc-gen-validate"),
             allow_files = True,
             executable = True,
@@ -222,11 +222,11 @@ java_proto_gen_validate = rule(
         "_validate_deps": attr.label_list(
             default = [
                 Label("@com_envoyproxy_protoc_gen_validate//validate:validate_java"),
-                Label("@com_google_re2j//jar"),
                 Label("@com_google_protobuf//:protobuf_java"),
                 Label("@com_google_protobuf//:protobuf_java_util"),
                 Label("@com_envoyproxy_protoc_gen_validate//java/pgv-java-stub/src/main/java/io/envoyproxy/pgv"),
                 Label("@com_envoyproxy_protoc_gen_validate//java/pgv-java-validation/src/main/java/io/envoyproxy/pgv"),
+                Label("@maven//:com_google_re2j_re2j"),
             ],
         ),
         "_java_toolchain": attr.label(default = Label("@bazel_tools//tools/jdk:current_java_toolchain")),
