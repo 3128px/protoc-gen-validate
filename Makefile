@@ -47,10 +47,6 @@ buildifier    := $(go_tools_dir)/bin/buildifier
 protoc-gen-go := $(go_tools_dir)/bin/protoc-gen-go
 gosimports    := $(go_tools_dir)/bin/gosimports
 
-bazel_files := WORKSPACE \
-	BUILD.bazel \
-	$(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path ".cache")
-
 test: $(bazelisk) ## Runs PGV tests
 	$(bazel) test //tests/... --test_output=errors
 
@@ -63,9 +59,10 @@ harness: $(go_harness) $(cc_harness) ## Runs PGV harness test
 
 validate_pb_go := validate/validate.pb.go
 
-build: $(validate_pb_go) $(current_binary) ## Builds PGV binary
+build: $(current_binary) ## Builds PGV binary
 
-all_nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go")
+bazel_files := WORKSPACE BUILD.bazel $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "bazel-*" -not -path ".cache")
+all_nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go" -not -path "templates/go/file.go" -not -path "bazel-*" -not -path ".cache")
 format: $(buildifier) $(gosimports)
 	@$(buildifier) --lint=fix $(bazel_files)
 	@$(go) mod tidy
@@ -89,12 +86,13 @@ gazelle: $(bazel) ## Runs gazelle against the codebase to generate Bazel BUILD f
 	@$(bazel) run //:gazelle
 
 bazel-build: $(bazel) ## Build PGV binary using bazel
-	@$(bazel) build -c opt //:$(name)
+	@$(bazel) build //:$(name)
 	@mkdir -p $(current_binary_path)
 	@cp -f bazel-bin/$(name)_/$(name)$(goexe) $(current_binary)
+	@chmod +x $(current_binary)
 
 # Internal helpers.
-build/$(name)_%/$(name)$(goexe):
+build/$(name)_%/$(name)$(goexe): $(validate_pb_go)
 	@GOBIN=$(root_dir)$(current_binary_path) $(go) install .
 
 $(validate_pb_go): $(protoc) $(protoc-gen-go) validate/validate.proto
