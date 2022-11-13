@@ -47,7 +47,7 @@ protoc-gen-go := $(go_tools_dir)/bin/protoc-gen-go
 gosimports    := $(go_tools_dir)/bin/gosimports
 golangci-lint := $(or $(shell which golangci-lint),$(go_tools_dir)/bin/golangci-lint)
 
-bazel_files       := WORKSPACE BUILD.bazel $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "./bazel-*" -not -path "./.cache")
+bazel_files       := WORKSPACE $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "./bazel-*" -not -path "./.cache")
 nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go" -not -path "./templates/go/file.go" -not -path "./bazel-*" -not -path "./.cache")
 
 # Harness executables.
