@@ -58,7 +58,7 @@ jobs:
       - name: Check
         run: make -f Next.mk check # check the consistency.
 
-      - name: Harness tests
+      - name: Run harness tests
         run: make -f Next.mk harness
 
       - name: Run unit tests
