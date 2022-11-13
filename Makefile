@@ -86,10 +86,9 @@ gazelle: $(bazel) ## Runs gazelle against the codebase to generate Bazel BUILD f
 	@$(bazel) run //:gazelle
 
 bazel-build: $(bazel) ## Build PGV binary using bazel
-	@$(bazel) build //:$(name)
-	@mkdir -p $(current_binary_path)
-	@cp -f bazel-bin/$(name)_/$(name)$(goexe) $(current_binary)
-	@chmod +x $(current_binary)
+	$(bazel) build //:$(name)
+	mkdir -p $(current_binary_path)
+	cp -f bazel-bin/$(name)_/$(name)$(goexe) $(current_binary)
 
 # Internal helpers.
 build/$(name)_%/$(name)$(goexe): $(validate_pb_go)

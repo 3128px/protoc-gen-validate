@@ -19,11 +19,6 @@ jobs:
           go-version: "1.19.3"
           cache: true
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-          cache: "pip"
-
       # make clean build allows to re-generate the generated files (validate/validate.pb.go).
       - name: Build the current binary
         run: make clean build
@@ -39,3 +34,6 @@ jobs:
       # Run tests.
       - name: Test
         run: make harness
+
+      - name: Build and test using bazel
+        run: make bazel-build harness test
