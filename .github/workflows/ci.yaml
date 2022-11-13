@@ -39,10 +39,6 @@ jobs:
           go-version: "1.19.3"
           cache: true
 
-      - uses: golangci/golangci-lint-action@v3 # For caching.
-        with:
-          version: v1.47.3
-
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
