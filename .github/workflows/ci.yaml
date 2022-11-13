@@ -17,8 +17,6 @@ jobs:
   test:
     runs-on: ubuntu-20.04
     timeout-minutes: 90  # instead of 360 by default.
-    env:
-      CACHE_DIR: ~/.cache # override the cache directory.
     steps:
       - name: Cancel when duplicated
         uses: styfle/cancel-workflow-action@0.9.1
@@ -29,7 +27,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            ~/.cache/tools
+            .cache/tools
             ~/.cache/bazel
           key: ${{ runner.os }}-build-cache
 
