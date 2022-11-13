@@ -61,8 +61,8 @@ validate_pb_go := validate/validate.pb.go
 
 build: $(current_binary) ## Builds PGV binary
 
-bazel_files := WORKSPACE BUILD.bazel $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "bazel-*" -not -path ".cache")
-all_nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go" -not -path "templates/go/file.go" -not -path "bazel-*" -not -path ".cache")
+bazel_files := WORKSPACE BUILD.bazel $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "./bazel-*" -not -path "./.cache")
+all_nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go" -not -path "./templates/go/file.go" -not -path "./bazel-*" -not -path "./.cache")
 format: $(buildifier) $(gosimports)
 	@$(buildifier) --lint=fix $(bazel_files)
 	@$(go) mod tidy
