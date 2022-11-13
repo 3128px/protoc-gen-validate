@@ -75,7 +75,7 @@ harness: $(go_harness) $(cc_harness) ## Runs PGV harness test
 # Note: ./templates/go/file.go is ignored.
 # TODO(dio): Format *.proto using buf format.
 # TODO(dio): Format files outside Go and Python.
-format: $(buildifier) $(gosimports) ## Format source code files.
+format: $(buildifier) $(gosimports) ## Format source code files
 	@$(buildifier) --lint=fix $(bazel_files)
 	@$(go) mod tidy
 	@$(go)fmt -s -w $(nongen_go_sources)
@@ -86,7 +86,7 @@ format: $(buildifier) $(gosimports) ## Format source code files.
 	@isort --check-only python/protoc_gen_validate/validator.py
 
 # TODO(dio): Lint non-Go files.
-lint: .golangci.yml $(golangci-lint) $(nongen_go_sources) ## Lint source code files.
+lint: .golangci.yml $(golangci-lint) $(nongen_go_sources) ## Lint source code files
 	@$(golangci-lint) run --timeout 5m --config $< ./...
 
 check: ## Check consistency
