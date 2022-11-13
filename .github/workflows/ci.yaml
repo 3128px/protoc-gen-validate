@@ -7,34 +7,35 @@ on:
   pull_request:
   workflow_dispatch:
 
-env:
-  # Keep these versions in sync with the Dockerfile
-  BDR_VER: '5.1.0'
-  GO_VER: '1.19.3'
-  PGG_VER: 'v1.28.1'
-  PROTOC_VER: '21.9'
-  PYTHON_VER: '3.8'
-  TEST_TAG: protoc-gen-validate:${{ github.sha }}
-
 jobs:
-  ci:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
-          go-version: ${{ env.GO_VER }}
+          go-version: 1.19.3
           cache: true
+
       - uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PYTHON_VER }}
+          python-version: 3.10
           cache: 'pip'
+
+      # make clean build allows to re-generate the generated files (validate/validate.pb.go).
+      - name: Build the current binary
+        run: make clean build
+
+      # Format all non-generated source files.
       - name: Format source files
         run: make format
-      - name: Generate and build the current binary
-        run: make clean build
-      - name: Check
+
+      # Check the generated files consistency and source code files format.
+      - name: Check consistency
         run: make check
+
+      # Run tests.
       - name: Test
-        run: make test
+        run: make harness
