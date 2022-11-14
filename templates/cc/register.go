@@ -7,13 +7,16 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/envoyproxy/protoc-gen-validate/templates/shared"
 	"github.com/iancoleman/strcase"
 	pgs "github.com/lyft/protoc-gen-star"
 	pgsgo "github.com/lyft/protoc-gen-star/lang/go"
 	"google.golang.org/protobuf/types/known/durationpb"
 	"google.golang.org/protobuf/types/known/timestamppb"
+
+	"github.com/envoyproxy/protoc-gen-validate/templates/shared"
 )
+
+const stringType = "string"
 
 func RegisterModule(tpl *template.Template, params pgs.Parameters) {
 	fns := CCFuncs{pgsgo.InitContext(params)}
@@ -71,7 +74,7 @@ func RegisterModule(tpl *template.Template, params pgs.Parameters) {
 	template.Must(tpl.New("sfixed64").Parse(numTpl))
 
 	template.Must(tpl.New("bool").Parse(constTpl))
-	template.Must(tpl.New("string").Parse(strTpl))
+	template.Must(tpl.New(stringType).Parse(strTpl))
 	template.Must(tpl.New("bytes").Parse(bytesTpl))
 
 	template.Must(tpl.New("email").Parse(emailTpl))
@@ -285,11 +288,11 @@ func (fns CCFuncs) oneofTypeName(f pgs.Field) pgsgo.TypeName {
 func (fns CCFuncs) inType(f pgs.Field, x interface{}) string {
 	switch f.Type().ProtoType() {
 	case pgs.BytesT:
-		return "string"
+		return stringType
 	case pgs.MessageT:
 		switch x.(type) {
 		case []string:
-			return "string"
+			return stringType
 		case []*durationpb.Duration:
 			return "pgv::protobuf_wkt::Duration"
 		default:
@@ -337,7 +340,7 @@ func (fns CCFuncs) cTypeOfString(s string) string {
 	case "uint64":
 		return "uint64_t"
 	case "[]byte":
-		return "string"
+		return stringType
 	default:
 		return s
 	}

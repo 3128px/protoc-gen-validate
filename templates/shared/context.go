@@ -5,9 +5,15 @@ import (
 	"fmt"
 	"text/template"
 
-	"github.com/envoyproxy/protoc-gen-validate/validate"
 	pgs "github.com/lyft/protoc-gen-star"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/envoyproxy/protoc-gen-validate/validate"
+)
+
+const (
+	wrapperType = "wrapper"
+	errorType   = "error"
 )
 
 type RuleContext struct {
@@ -34,10 +40,10 @@ func rulesContext(f pgs.Field) (out RuleContext, err error) {
 	var wrapped bool
 	if out.Typ, out.Rules, out.MessageRules, wrapped = resolveRules(f.Type(), &rules); wrapped {
 		out.WrapperTyp = out.Typ
-		out.Typ = "wrapper"
+		out.Typ = wrapperType
 	}
 
-	if out.Typ == "error" {
+	if out.Typ == errorType {
 		err = fmt.Errorf("unknown rule type (%T)", rules.Type)
 	}
 
@@ -57,7 +63,7 @@ func (ctx RuleContext) Key(name, idx string) (out RuleContext, err error) {
 
 	out.Typ, out.Rules, out.MessageRules, _ = resolveRules(ctx.Field.Type().Key(), rules.GetKeys())
 
-	if out.Typ == "error" {
+	if out.Typ == errorType {
 		err = fmt.Errorf("unknown rule type (%T)", rules)
 	}
 
@@ -83,10 +89,10 @@ func (ctx RuleContext) Elem(name, idx string) (out RuleContext, err error) {
 	var wrapped bool
 	if out.Typ, out.Rules, out.MessageRules, wrapped = resolveRules(ctx.Field.Type().Element(), rules); wrapped {
 		out.WrapperTyp = out.Typ
-		out.Typ = "wrapper"
+		out.Typ = wrapperType
 	}
 
-	if out.Typ == "error" {
+	if out.Typ == errorType {
 		err = fmt.Errorf("unknown rule type (%T)", rules)
 	}
 
@@ -94,7 +100,7 @@ func (ctx RuleContext) Elem(name, idx string) (out RuleContext, err error) {
 }
 
 func (ctx RuleContext) Unwrap(name string) (out RuleContext, err error) {
-	if ctx.Typ != "wrapper" {
+	if ctx.Typ != wrapperType {
 		err = fmt.Errorf("cannot unwrap non-wrapper type %q", ctx.Typ)
 		return
 	}
@@ -170,7 +176,7 @@ func resolveRules(typ interface{ IsEmbed() bool }, rules *validate.FieldRules) (
 		}
 		return "none", nil, nil, false
 	default:
-		ruleType, rule, wrapped = "error", nil, false
+		ruleType, rule, wrapped = errorType, nil, false
 	}
 
 	return ruleType, rule, rules.Message, wrapped
