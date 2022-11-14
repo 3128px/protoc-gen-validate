@@ -10,29 +10,18 @@ on:
   workflow_dispatch:
 
 defaults:
-  run:  # use bash for all operating systems unless overridden
+  run: # use bash for all operating systems unless overridden.
     shell: bash
 
 jobs:
   test:
     runs-on: ubuntu-20.04
-    timeout-minutes: 90  # instead of 360 by default.
+    timeout-minutes: 90 # instead of 360 by default.
     steps:
       - name: Cancel when duplicated
         uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            .cache/tools
-            ~/.cache/bazel
-          key: ${{ runner.os }}-build-cache-${{ hashFiles('Tools.mk') }}
-
-      - name: Checkout
-        uses: actions/checkout@v3 # shallow checkout.
 
       - uses: actions/setup-go@v3
         with:
@@ -42,10 +31,35 @@ jobs:
       - uses: actions/setup-python@v4
         with:
           python-version: "3.10"
-          cache: 'pip'
+          cache: "pip"
+
+      - name: Download cache for bazel
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: test-${{ runner.os }}-bazel-cache
+
+      - name: Download cache for Tools
+        uses: actions/cache@v3
+        with:
+          path: "./.cache/tools"
+          # Downloading cached tools needs to use an exact key, since we currently don't do
+          # versioning for each cached binary.
+          key: test-${{ runner.os }}-${{ hashFiles('Tools.mk') }}
+
+      - name: Download cache for Go
+        uses: actions/cache@v3
+        with:
+          path: ~/go/pkg/mod
+          # When we update Tools.mk, there is a possibility we download a new Go dependencies.
+          key: test-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum', 'Tools.mk') }}
+          restore-keys: test-${{ runner.os }}
+
+      - name: Checkout
+        uses: actions/checkout@v3 # shallow checkout.
 
       - name: Build
-        run: make -f Next.mk clean build
+        run: make -f Next.mk clean build # we do "clean build" here, hence *.pb.go is regenerated.
 
       - name: Format
         run: |
