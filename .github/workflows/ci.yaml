@@ -23,6 +23,9 @@ jobs:
         with:
           access_token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Checkout
+        uses: actions/checkout@v3 # shallow checkout.
+
       - uses: actions/setup-go@v3
         with:
           go-version: "1.19.3"
@@ -54,9 +57,6 @@ jobs:
           # When we update Tools.mk, there is a possibility we download a new Go dependencies.
           key: test-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum', 'Tools.mk') }}
           restore-keys: test-${{ runner.os }}
-
-      - name: Checkout
-        uses: actions/checkout@v3 # shallow checkout.
 
       - name: Build
         run: make -f Next.mk clean build # we do "clean build" here, hence *.pb.go is regenerated.
