@@ -50,14 +50,6 @@ jobs:
           # versioning for each cached binary.
           key: test-${{ runner.os }}-${{ hashFiles('Tools.mk') }}
 
-      - name: Download cache for Go
-        uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          # When we update Tools.mk, there is a possibility we download a new Go dependencies.
-          key: test-${{ runner.os }}-${{ hashFiles('go.mod', 'go.sum', 'Tools.mk') }}
-          restore-keys: test-${{ runner.os }}
-
       - name: Build
         run: make -f Next.mk clean build # we do "clean build" here, hence *.pb.go is regenerated.
 
