@@ -15,11 +15,6 @@ goos   := $(shell $(go) env GOOS)
 current_binary_path := build/$(name)_$(goos)_$(goarch)
 current_binary      := $(current_binary_path)/$(name)$(goexe)
 
-# Overridable variables.
-# Currently, harness tests only run against C++ and Go implementations.
-# Note: we do harness tests for all languages via bazel.
-# TODO(dio): Run harness to all supported languages.
-HARNESS_LANGUAGES ?= cc go
 # Local cache directory.
 CACHE_DIR ?= $(root_dir).cache
 
@@ -50,10 +45,6 @@ golangci-lint := $(or $(shell which golangci-lint),$(go_tools_dir)/bin/golangci-
 bazel_files       := WORKSPACE $(shell find . \( -name "*.bzl" -or -name "*.bazel" -or -name "BUILD" \) -not -path "./bazel-*" -not -path "./.cache")
 nongen_go_sources := $(shell find . -name "*.go" -not -path "*.pb.go" -not -path "*.pb.validate.go" -not -path "./templates/go/file.go" -not -path "./bazel-*" -not -path "./.cache")
 
-# Harness executables.
-go_harness   := $(root_dir)tests/harness/go/main/go-harness
-cc_harness   := $(root_dir)tests/harness/cc/cc-harness
-
 # List of harness test cases for Go.
 tests_harness_cases_go := \
 	/harness \
@@ -68,9 +59,6 @@ test: $(bazel) $(tests_harness_cases_go) ## Runs PGV tests
 	@$(bazel) test //tests/... --test_output=errors
 
 build: $(current_binary) ## Builds PGV binary
-
-harness: $(go_harness) $(cc_harness) ## Runs PGV harness test
-	@$(go) run tests/harness/executor/*.go $(addprefix -,$(HARNESS_LANGUAGES))
 
 # Note: ./templates/go/file.go is ignored.
 # TODO(dio): Format *.proto using buf format.
@@ -122,15 +110,6 @@ build/$(name)_%/$(name)$(goexe): $(validate_pb_go)
 # Generate validate/validate.pb.go from validate/validate.proto.
 $(validate_pb_go): $(protoc) $(protoc-gen-go) validate/validate.proto
 	@$(protoc) -I . --go_opt=paths=source_relative --go_out=. $(filter %.proto,$^)
-
-# Build go-harnes executable.
-$(go_harness): $(tests_harness_cases_go)
-	@cd tests/harness/go/main && $(go) build -o $@ .
-
-# Build cc-harnes executable.
-$(cc_harness):
-	@bazel build //tests/harness/cc:cc-harness
-	@cp bazel-bin/tests/harness/cc/cc-harness $@
 
 # Generate all required files for harness tests in Go.
 $(tests_harness_cases_go): $(current_binary)

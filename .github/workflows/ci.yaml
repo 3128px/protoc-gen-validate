@@ -72,11 +72,8 @@ jobs:
       - name: Check
         run: make -f Next.mk check # check the consistency.
 
-      - name: Run harness tests
-        run: make -f Next.mk harness
-
-      - name: Run unit tests
+      - name: Run tests
         run: make -f Next.mk test # runs tests using bazel.
 
-      - name: Run bazel checks
+      - name: Run additional checks
         run: make -f Next.mk bazel-build bazel-build-tests-generation bazel-test-example-workspace
